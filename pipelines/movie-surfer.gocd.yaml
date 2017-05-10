@@ -1,0 +1,12 @@
+pipelines:
+  MovieSurferPipe:
+    group: MovieSurfer
+    materials:
+      mygit:
+        git: https://github.com/sebradloff/movie-surfer
+    stages:
+      - build:
+          jobs:
+            build:
+              tasks:
+                script: echo "HELLO"
