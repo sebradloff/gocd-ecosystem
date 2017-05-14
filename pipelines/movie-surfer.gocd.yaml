@@ -1,12 +1,15 @@
 pipelines:
-  MovieSurferPipe:
-    group: MovieSurfer
+  MovieSurfer:
+    group: applications
     materials:
       mygit:
-        git: https://github.com/sebradloff/movie-surfer
+        git: https://github.com/sebradloff/movie-surfer.git
     stages:
       - build:
           jobs:
-            build:
+            inside:
               tasks:
-                script: echo "HELLO"
+                - exec:
+                    command: echo
+                    arguments:
+                      - "Hello World"

@@ -3,7 +3,7 @@
   <server artifactsdir="artifacts" agentAutoRegisterKey="388b633a88de126531afa41eff9aa69e" commandRepositoryLocation="default" serverId="259af71a-1542-4407-a280-d5cf81b0e9f1" />
   <config-repos>
     <config-repo plugin="yaml.config.plugin">
-      <git url="https://github.com/sebradloff/go-pipeline-configs.git" />
+      <git url="/var/go/repos/pipelines.git" />
     </config-repo>
   </config-repos>
   <pipelines group="MovieSurfer" />
