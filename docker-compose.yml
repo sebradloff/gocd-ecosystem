@@ -1,13 +1,15 @@
 version: '3'
 services:
   go-server:
-    build: .
+    image: gocd/gocd-server:v17.4.0
     ports:
-    - "8153:8153"
-    - "8154:8154"
+      - "8153:8153"
+      - "8154:8154"
     volumes:
-    - ./cruise-config.xml:/godata/config/cruise-config.xml
-    - ./plugins:/godata/plugins/external/
+      - ./cruise-config.xml:/godata/config/cruise-config.xml
+      - ./plugins:/godata/plugins/external/
+    links:
+      - git-daemon
   go-agent:
     image: gocd/gocd-agent-alpine-3.5:v17.4.0
     environment:
@@ -15,3 +17,9 @@ services:
       - AGENT_AUTO_REGISTER_KEY=388b633a88de126531afa41eff9aa69e
     links:
       - go-server
+  git-daemon:
+    image: bankiru/git-daemon
+    ports:
+      - "9418:9418"
+    volumes:
+      - ../go-pipeline-configs:/git
