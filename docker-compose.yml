@@ -11,7 +11,9 @@ services:
     links:
       - git-daemon
   go-agent:
-    image: gocd/gocd-agent-alpine-3.5:v17.4.0
+    build:
+      context: .
+      dockerfile: Dockerfile-go-agent
     environment:
       - GO_SERVER_URL=https://go-server:8154/go
       - AGENT_AUTO_REGISTER_KEY=388b633a88de126531afa41eff9aa69e
