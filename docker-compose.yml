@@ -1,0 +1,17 @@
+version: '3'
+services:
+  go-server:
+    build: .
+    ports:
+    - "8153:8153"
+    - "8154:8154"
+    volumes:
+    - ./cruise-config.xml:/godata/config/cruise-config.xml
+    - ./plugins:/godata/plugins/external/
+  go-agent:
+    image: gocd/gocd-agent-alpine-3.5:v17.4.0
+    environment:
+      - GO_SERVER_URL=https://go-server:8154/go
+      - AGENT_AUTO_REGISTER_KEY=388b633a88de126531afa41eff9aa69e
+    links:
+      - go-server

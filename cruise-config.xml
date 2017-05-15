@@ -6,5 +6,5 @@
       <git url="/var/go/repos/pipelines.git" />
     </config-repo>
   </config-repos>
-  <pipelines group="MovieSurfer" />
+  <pipelines group="applications" />
 </cruise>

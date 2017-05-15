@@ -1,5 +1,6 @@
-## GoCD server
+## GoCD in a box
 
-`$ sh start_go_server.sh`
+This project contains a dockerized GoCD server and agent setup.
 
-This will build the go server and run it on port 8153.
+To run this project with one server and one agent you should run the following:
+`$ docker-compose up`
