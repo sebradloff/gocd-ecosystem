@@ -24,4 +24,4 @@ services:
     ports:
       - "9418:9418"
     volumes:
-      - ../go-pipeline-configs:/git
+      - ${PIPELINE_CODE}:/git
