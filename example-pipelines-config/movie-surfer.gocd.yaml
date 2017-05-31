@@ -11,20 +11,20 @@ pipelines:
             Build:
               tasks:
                 - script: docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
-                - script: docker build -t sebradloff/movie-surfer-snap .
-                - script: docker push sebradloff/movie-surfer-snap
+                - script: docker build -t $DOCKER_USERNAME/movie-surfer-snap .
+                - script: docker push $DOCKER_USERNAME/movie-surfer-snap
       - UnitTest:
           jobs:
             UnitTest:
               tasks:
                 - script: docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
-                - script: docker pull sebradloff/movie-surfer-snap
-                - script: docker run --rm --entrypoint npm sebradloff/movie-surfer-snap test
+                - script: docker pull $DOCKER_USERNAME/movie-surfer-snap
+                - script: docker run --rm --entrypoint npm $DOCKER_USERNAME/movie-surfer-snap test
       - Publish:
           jobs:
             Publish:
               tasks:
                 - script: docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
-                - script: docker pull sebradloff/movie-surfer-snap
-                - script: docker tag sebradloff/movie-surfer-snap sebradloff/movie-surfer
-                - script: docker push sebradloff/movie-surfer
+                - script: docker pull $DOCKER_USERNAME/movie-surfer-snap
+                - script: docker tag $DOCKER_USERNAME/movie-surfer-snap $DOCKER_USERNAME/movie-surfer
+                - script: docker push $DOCKER_USERNAME/movie-surfer
