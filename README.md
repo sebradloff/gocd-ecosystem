@@ -15,3 +15,10 @@ If you'd like to scale the number of Go agents you can run the docker-compose sc
 `$ PIPELINE_CODE="PATH_TO_PIPELINE_CODE" docker-compose up -d && docker-compose scale go-agent=3`
 
 Here we scale the number of Go agents to 3 but you can replace that number for however many agents you'd like.
+
+There is also a Makefile command `up` that will orchestrate 3 Go agents for you:
+
+`$ PIPELINE_CODE="PATH_TO_PIPELINE_CODE" make up`
+
+### Collaborators
+[Mason Richins](https://github.com/mrichins)
