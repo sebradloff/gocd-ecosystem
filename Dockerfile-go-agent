@@ -1,14 +1,23 @@
 FROM gocd/gocd-agent-alpine-3.5:v17.4.0
 
-ENV BUILD_PACKAGES bash curl-dev ruby-dev build-base
+ENV BUILD_PACKAGES bash curl-dev ruby-dev build-base openrc
 ENV NPM_PACKAGES nodejs
 ENV JAVA_PACKAGES openjdk8
 
-# Update and install all of the required packages.
+# Update and install all of the required packages
 # At the end, remove the apk cache
 RUN apk update && \
     apk upgrade && \
+    apk add docker && \
     apk add $BUILD_PACKAGES && \
     apk add $NPM_PACKAGES && \
     apk add $JAVA_PACKAGES && \
+    apk update && \
     rm -rf /var/cache/apk/*
+
+# Allows users to run docker as though it was root
+# This is necessary for the connection to the docker daemon volume mount
+RUN chmod +s $(which docker)
+
+# This boots docker on startup
+RUN rc-update add docker boot

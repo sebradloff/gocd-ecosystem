@@ -17,6 +17,8 @@ services:
     environment:
       - GO_SERVER_URL=https://go-server:8154/go
       - AGENT_AUTO_REGISTER_KEY=388b633a88de126531afa41eff9aa69e
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     links:
       - go-server
   git-daemon:
