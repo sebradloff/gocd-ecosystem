@@ -1,0 +1,30 @@
+pipelines:
+  MovieSurfer:
+    group: applications
+    materials:
+      mygit:
+        git: https://github.com/sebradloff/movie-surfer.git
+    stages:
+      - Build:
+          clean_workspace: true
+          jobs:
+            Build:
+              tasks:
+                - script: docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
+                - script: docker build -t sebradloff/movie-surfer-snap .
+                - script: docker push sebradloff/movie-surfer-snap
+      - UnitTest:
+          jobs:
+            UnitTest:
+              tasks:
+                - script: docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
+                - script: docker pull sebradloff/movie-surfer-snap
+                - script: docker run --rm --entrypoint npm sebradloff/movie-surfer-snap test
+      - Publish:
+          jobs:
+            Publish:
+              tasks:
+                - script: docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
+                - script: docker pull sebradloff/movie-surfer-snap
+                - script: docker tag sebradloff/movie-surfer-snap sebradloff/movie-surfer
+                - script: docker push sebradloff/movie-surfer

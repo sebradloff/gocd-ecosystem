@@ -1,0 +1,17 @@
+pipelines:
+  TheMet:
+    group: applications
+    materials:
+      mygit:
+        git: https://github.com/sebradloff/the-met.git
+    stages:
+      - UnitTest:
+          clean_workspace: true
+          jobs:
+            UnitTest:
+              tasks:
+                - exec:
+                    command: ./gradlew
+                    arguments:
+                      - clean
+                      - test
