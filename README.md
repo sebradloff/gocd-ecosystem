@@ -10,6 +10,7 @@ The docker-compose command takes an environment variable name "PIPELINE_CODE". T
 To run a demo of this project with one server, three agents, and the pipeline code in the folder 'example-pipelines-config'.
 - Add a `credentials.env` file with DOCKER_USERNAME and DOCKER_PASSWORD defined corresponding to your dockerhub account.
 - `$ make demo`
+- Access it at `http://localhost:8153`, it should become visible after 30 or so seconds.
 
 **It's that simple!**
 
@@ -30,5 +31,6 @@ There is also a Makefile command `up` that will orchestrate as many Go agents as
 
 i.e. `PIPELINE_CODE=../my-pipeline-config-repo SCALE=5  make up`
 
+The UI is still accessible at `http://localhost:8153`.
 ### Collaborators
 [Mason Richins](https://github.com/mrichins)
