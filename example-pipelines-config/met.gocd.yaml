@@ -10,8 +10,16 @@ pipelines:
           jobs:
             UnitTest:
               tasks:
-                - exec:
-                    command: ./gradlew
-                    arguments:
-                      - clean
-                      - test
+                - script: ./gradlew clean test
+      - Build:
+          clean_workspace: true
+          jobs:
+            Build:
+              artifacts:
+               - build:
+                   source: build/libs/met-service-0.0.1-SNAPSHOT.jar
+                   destination: builds
+              tabs:
+                builds: builds
+              tasks:
+                - script: ./gradlew clean build -x test
