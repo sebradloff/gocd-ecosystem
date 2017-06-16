@@ -20,6 +20,11 @@ pipelines:
                 - script: docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
                 - script: docker pull $DOCKER_USERNAME/movie-surfer-snap
                 - script: docker run --rm --entrypoint npm $DOCKER_USERNAME/movie-surfer-snap test
+            Lint:
+              tasks:
+                - script: docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
+                - script: docker pull $DOCKER_USERNAME/movie-surfer-snap
+                - script: docker run --rm --entrypoint npm $DOCKER_USERNAME/movie-surfer-snap run lint:browser
       - Publish:
           jobs:
             Publish:
