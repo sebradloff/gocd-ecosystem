@@ -36,7 +36,7 @@ The UI is still accessible at `http://localhost:8153`.
 ### Diagram
 This diagram illustrates the three service types declared in the docker-compose file, how they interact with the host machine, and how they interact with each other.
 
-![Alt text](/gocd-ecosystem.jpeg?raw=true "GoCD Ecosystem Diagram")
+![Alt text](/gocd-ecosystem.jpg?raw=true "GoCD Ecosystem Diagram")
 
 The orange arrows represent volume mounts, with the only exception being 'credentials.env'.
 
