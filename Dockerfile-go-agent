@@ -1,4 +1,4 @@
-FROM gocd/gocd-agent-alpine-3.5:v17.4.0
+FROM gocd/gocd-agent-alpine-3.5:v17.10.0
 
 ENV BUILD_PACKAGES bash curl-dev ruby-dev build-base openrc
 ENV NPM_PACKAGES nodejs
