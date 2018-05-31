@@ -1,31 +1,32 @@
 version: '3'
 services:
   go-server:
-    image: gocd/gocd-server:v17.10.0
+    build:
+      context: .
+      dockerfile: Dockerfile-go-server
+      args:
+        - PRIVATE_KEY=${PRIVATE_KEY}
+        - CIPHER=${CIPHER}
+    environment:
+      - GO_SERVER_SYSTEM_PROPERTIES="-Dmaterial.update.idle.interval=5000"
     ports:
       - "8153:8153"
       - "8154:8154"
     volumes:
       - ./cruise-config.xml:/godata/config/cruise-config.xml
-      - ./plugins:/godata/plugins/external/
-    links:
-      - git-daemon
+      - ./plugins:/godata/plugins/external/:ro
   go-agent:
     build:
       context: .
       dockerfile: Dockerfile-go-agent
-    env_file:
-      - credentials.env
+      args:
+        - PRIVATE_KEY=${PRIVATE_KEY}
     environment:
       - GO_SERVER_URL=https://go-server:8154/go
       - AGENT_AUTO_REGISTER_KEY=388b633a88de126531afa41eff9aa69e
+      - AGENT_AUTO_REGISTER_ENVIRONMENTS=development
+      - AGENT_AUTO_REGISTER_RESOURCES=slice-mesos-development
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     links:
       - go-server
-  git-daemon:
-    image: bankiru/git-daemon
-    ports:
-      - "9418:9418"
-    volumes:
-      - ${PIPELINE_CODE}:/git
