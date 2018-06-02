@@ -1,59 +1,73 @@
-## GoCD in a Box
+# GoCD in a Box
 
-This project contains a dockerized GoCD server, GoCD agent, and a git-daemon to server your pipeline as code setup.
+This project contains a dockerized GoCD server and GoCD agent configuration. If you're not familiar with GoCD concepts, I suggest you start with [their intro documentation](https://docs.gocd.org/current/introduction/concepts_in_go.html).
 
 The purpose of this project is to be able to spin up a local instance of your CI/CD pipeline to test your changes locally before pushing to your "production" CI/CD server.
 
-The docker-compose command takes an environment variable name "PIPELINE_CODE". This variable specifies the location of your pipeline as code repository which is volume mounted into the git-daemon container.
+The idea is to feed your personal ssh key authorized by GitHub and provide the cipher key for your production CI/CD server, to test any changes in pipeline code locally.
 
-### Demo
-To run a demo of this project with one server, three agents, and the pipeline code in the folder 'example-pipelines-config'.
-- Add a `credentials.env` file with DOCKER_USERNAME and DOCKER_PASSWORD defined corresponding to your dockerhub account.
-- `$ make demo`
-- Access it at `http://localhost:8153`, it should become visible after 30 or so seconds.
+## Getting Started
+### SSH key connection to GitHub
+Make sure that you have an ssh key on your machine [accepted with GitHub](https://help.github.com/articles/connecting-to-github-with-ssh/).
 
-**It's that simple!**
+The documentation to check for [ssh keys](https://help.github.com/articles/connecting-to-github-with-ssh/) and [testing whether your ssh key is authenticated with GitHub](https://help.github.com/articles/testing-your-ssh-connection/).
 
-### Use Your Own Config
-To run this project with one server and one agent you should run the following:
+### Production GoCD cipher key
 
-`$ PIPELINE_CODE="PATH_TO_PIPELINE_CODE" docker-compose up`
+The production GoCD cipher key is necessary for encrypting and decrypting secure variables. The GoCD API on the GoCD server is [used to encrypt variables](https://api.gocd.org/17.12.0/#encrypt-a-plain-text-value). The cipher key is used to decrypt those encrypted values used when in pipeline configuration files.
 
-If you'd like to scale the number of Go agents you can run the docker-compose scale command:
+### Location to your pipeline configuration code
 
-`$ PIPELINE_CODE="PATH_TO_PIPELINE_CODE" docker-compose up -d && docker-compose scale go-agent=3`
+We're utilizing the [yaml config plugin](https://github.com/tomzo/gocd-yaml-config-plugin) to configure pipeline as code.
 
-Here we scale the number of Go agents to 3 but you can replace that number for however many agents you'd like.
+The `cruise-config.xml` contains the configuration for where to look for pipeline configuration code. We recommend reading the [documentation of pipeline as code with GoCD](https://docs.gocd.org/current/advanced_usage/pipelines_as_code.html) if you do not know about the `cruise-config.xml` file.
 
-There is also a Makefile command `up` that will orchestrate as many Go agents as you like:
+We recommend copying the relevant `cruise-config.xml` portion from your production GoCD server and modifying it to work for local use.
 
-`$ PIPELINE_CODE="PATH_TO_PIPELINE_CODE" SCALE=NUMBER_OF_AGENTS make up`
+We will be utilizing GitHub as the git server, meaning any changes you make to your pipeline as code will have to be in GitHub to be picked up by your local GoCD ecosystem.
 
-i.e. `PIPELINE_CODE=../my-pipeline-config-repo SCALE=5  make up`
+The pipeline configuration files should end with the extension `.gocd.yaml` or `.gocd.yml` for the [GoCD server to find them](https://github.com/tomzo/gocd-yaml-config-plugin#file-pattern).
 
-The UI is still accessible at `http://localhost:8153`.
+The copy and paste to which we refer to in the next 2 sections, should be copied to the `cruise-config.xml` file located in the root of this project.
 
-### Diagram
-This diagram illustrates the three service types declared in the docker-compose file, how they interact with the host machine, and how they interact with each other.
+#### Master branch pipeline
 
-![Alt text](/gocd-ecosystem.jpg?raw=true "GoCD Ecosystem Diagram")
+Copy and paste the `config-repo` xml element for the repository that you want to modify the pipeline code, in between the `cruise` element tags. Then add a `branch` attribute to the `git` element, in which you specify the GitHub branch containing the pipeline code you wish to test.
+```
+<config-repo pluginId="yaml.config.plugin" id="ec7db9ae-045d-4a3c-be91-76b88f456ef4">
+  <git url="git@github.com:slicelife/fake-repo" branch="making-pipeline-code-changes" />
+</config-repo>
+```
+This tells the GoCD server use the git protocol to look for yaml pipeline as code configuration files in the GitHub `slicelife/fake-repo` repository, on the `making-pipeline-code-changes` branch, which control the pipeline of the master branch.
 
-The orange arrows represent volume mounts, with the only exception being 'credentials.env'.
+### PR branch pipeline
 
-The [GoCD server documentation](https://github.com/gocd/docker-gocd-server) mentions specific mount points, but here we explain the two mount points we utilize:
-- The 'cruise-config.xml' file contains your basic GoCD server configuration, including the agent registration key, location of the git repository containing pipeline as code, and any other basic pipeline definitions.
-- The 'plugins' volume mount represents the jars of any plugins used for GoCD. In this ecosystem,  we are mount the plugins folder with the script-executor and yaml-config plugins.
+We utilize [two plugins to poll for PRs and allow PRs to have pipelines](https://github.com/ashwanthkumar/gocd-build-github-pull-requests). Those plugin jars are available on the local GoCD ecosystem.
 
-The [git daemon documentation](https://github.com/bankiru/docker-git-daemon) demonstrates the container options as well as the git repository volume mount, but here we explain our use of that volume mount:
-- The 'pipeline-code' volume mount represents the entire gocd-ecosystem repository in the demo instance. This means we are serving up the entire gocd-ecosystem due to how the git daemon works. This is ok for now, because the yaml-config plugin will only pick up files ending in 'gocd.yaml' and ignore the rest.
+Copy and paste the `scm` xml element for the repository that you want to modify the PR pipeline code, in between the `scms` element tags. Then add a `property` element in between the `configuration` element tags, in which you specify the GitHub branch containing the pipeline code you wish to test.
+```
+<scm id="0d8f07a7-74f5-455e-aa4d-3d973aae41dc" name="fake-repo-pr">
+  <pluginConfiguration id="github.pr" version="1" />
+  <configuration>
+    <property>
+      <key>url</key>
+      <value>git@github.com:slicelife/fake-repo</value>
+    </property>
+    <property>
+      <key>defaultBranch</key>
+      <value>making-pipeline-code-changes</value>
+    </property>
+  </configuration>
+</scm>
+```
+This tells the GoCD server use the git protocol to look for yaml pipeline as code configuration files in the GitHub `slicelife/fake-repo` repository, on the `making-pipeline-code-changes` branch, which control the pipeline for any new PR opened on that GitHub repository.
 
-The [GoCD agent documentation](https://github.com/gocd/docker-gocd-agent-alpine-3.5) mentions specific mount points and configurations, but here we don't actually utilize any of those:
-- The 'credentials.env' file is not technically volume mounted but is utilized as an environment file for a person's Dockerhub login. Those variables are interpolated in the pipeline as code file 'movie-surfer.gocd.yaml'.
-- The 'docker.sock' is volume mounted from the host machine to allow the go-agent instances to run docker processes. For a container to create sibling containers, the container requires it's own docker client installed (as seen in the Dockerfile) and the docker.sock of the host machine.
+## How to modify pipeline code and watch it run?
 
-The black arrow represents the git protocol utilized by the go-server to poll the repository for pipeline as code.
+### Starting the local GoCD ecosystem
+Simply provide the location on your local to your ssh key connected to GitHub and then the cipher key for your production GoCD server by running the following command.
+`$ make run PRIVATE_KEY=~/.ssh/id_rsa CIPHER=XXXXXXX`
 
-The green arrows represent the go-agent instances self registering and sustaining a connection with the go-server.
+Access the GoCD UI at `http://localhost:8153`, it should become visible after 30 or so seconds.
 
-### Collaborators
-[Mason Richins](https://github.com/mrichins)
+You should see your pipeline groups kick off with builds as soon as the GoCD agents connect to the GoCD server.
