@@ -1,0 +1,15 @@
+FROM gocd/gocd-server:v17.12.0
+
+RUN mkdir -p /home/go/.ssh
+RUN ssh-keyscan -t rsa github.com >> /home/go/.ssh/known_hosts
+
+# Add private key to access github repositories
+ARG PRIVATE_KEY
+RUN echo "${PRIVATE_KEY}" >> /home/go/.ssh/id_rsa
+RUN chown -R 1000:1000 /home/go/.ssh
+RUN chmod 400 /home/go/.ssh/id_rsa
+
+# Add cipher for secure vars
+ARG CIPHER
+RUN mkdir -p /godata/config
+RUN echo "${CIPHER}" >> /godata/config/cipher
