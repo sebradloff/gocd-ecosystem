@@ -71,3 +71,26 @@ Simply provide the location on your local to your ssh key connected to GitHub an
 Access the GoCD UI at `http://localhost:8153`, it should become visible after 30 or so seconds.
 
 You should see your pipeline groups kick off with builds as soon as the GoCD agents connect to the GoCD server.
+
+### Making changes to the pipeline code
+Now we get to the purpose of this project. You want to test changes to pipeline code BEFORE you push it to the "production" GoCD server. Let's walk through what the development process looks like to modify those pipelines and observe your changes.
+
+#### ONLY yaml pipeline configuration file changes
+This subsection deals with modifying and observing behavior when changes have ONLY been made to the yaml pipeline configuration files. This means that you have NOT made any changes to any other files and are simply seeing how changing a pipeline definition affects the behavior. An example of this could be removing a GoCD environment variable from the stage scope and placing it in the pipeline scope to follow the DRY principle.
+##### Master pipeline
+If you followed the steps above, you're ready to start developing changes to the pipeline code. Simply modify whatever portion of the pipeline code you'd like, commit and push it to your branch on GitHub. The new change in the config will get picked up by the GoCD server in about 30 seconds, but it will NOT trigger a pipeline run. This is because there was no change to the master branch. Therefore to observe your pipeline changes, you'll need to trigger it manually through the UI.
+##### PR pipeline
+If you followed the steps above, you're ready to start developing changes to the pipeline code. Simply modify whatever portion of the pipeline code you'd like, commit and push it to your branch on GitHub. The new change in the config will get picked up by the GoCD server in about 30 seconds, but it will NOT trigger a pipeline run. This picks up changes for any PRs so you'll need to trigger it manually through the UI.
+### Pipeline configuration file changes AND/OR other file changes
+This subsection deals with modifying and observing behavior when changes have been made to both the yaml pipeline configuration files and/or other project files. This means your are seeing how changing a pipeline definition and/or combined with file changes affects the behavior. An example is testing a change in a makefile task that the GoCD job calls or adding a new environment variable to your application then making sure it deploys properly.
+#### Master pipeline
+The same setup is required as the section above on only yaml pipeline changes, but now we need to specify in the yaml file, what the pipeline should use as material. It defaults to the master branch, so we need to change it to use material from the branch you've created.
+```
+materials:
+      git:
+        git: git@github.com:slicelife/fake-repo
+        branch: making-pipeline-code-changes
+```
+Now if you make any changes to any material on that branch and push it up, it will AUTOMATICALLY trigger a run.
+#### PR pipeline
+The same setup is required as the section above on only yaml pipeline changes for PR pipeline code. You need to now open a PR with your new code to get the PR pipeline to trigger. Simply make your changes, commit it, push it up, and watch it build. Any new changes to that branch will continue to trigger the PR pipeline.
